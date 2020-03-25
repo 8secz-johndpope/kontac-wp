@@ -90,7 +90,7 @@ new _reports2.default(app);
 /*=========== PAUSES ==========*/
 new _pauses2.default(app);
 
-https.listen(443, function () {
+https.listen(80, function () {
     console.log('Servidor rodando em https://127.0.0.1');
 });
 

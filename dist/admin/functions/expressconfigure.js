@@ -70,7 +70,7 @@ var expressConfigure = function expressConfigure() {
         if (req.session.logged) {
             next();
         } else {
-            res.redirect('/login?agent=https://' + req.headers.host + '/agent');
+            res.redirect('/login?agent=http://' + req.headers.host + '/agent');
         }
     });
 
