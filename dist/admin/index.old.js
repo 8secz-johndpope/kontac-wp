@@ -53,9 +53,9 @@ if (!process.env.HOSTNAME) {
 }
 
 var app = new _expressconfigure2.default();
-var https = require('https').createServer({
-    key: _fs2.default.readFileSync('/etc/letsencrypt/live/whatsapp.telek.com.br/privkey.pem'),
-    cert: _fs2.default.readFileSync('/etc/letsencrypt/live/whatsapp.telek.com.br/cert.pem')
+var https = require('http').createServer({
+    //key: fs.readFileSync('/etc/letsencrypt/live/whatsapp.telek.com.br/privkey.pem'),
+    //cert: fs.readFileSync('/etc/letsencrypt/live/whatsapp.telek.com.br/cert.pem')
 }, app);
 var io = require('socket.io')(https);
 
