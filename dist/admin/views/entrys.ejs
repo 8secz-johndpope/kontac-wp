@@ -1,0 +1,73 @@
+<%- contentFor('pageSectionA') %>
+<h3 class="mx-5">Canais de entrada</h3>
+<div class="row">
+	<div class="card w-100 mx-5">
+		<div class="card-body">
+			<a href="/entrys/add">
+				<button class="btn btn-info mb-2 float-right">Criar</button>
+			</a>
+			<div class="table-responsive">
+				<% if(alert){ %><div class="alert alert-fill-<%=alert[0]; %> my-3 w-100"><%=alert[1]; %></div><% } %>
+				<table id="dataTableMain" class="table">
+					<thead>
+						<tr>
+							<th>Título do canal</th>
+                            <th width="1%">Canal</th>
+                            <th>Identificador</th>
+							<th>Status</th>
+							<th>Criado em</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<% entrys.forEach(entry=>{ %>
+						<tr json-data='<%=entry.json_data %>' connector_external_id='<%=entry.connector_external_id %>'>
+							<td><%=entry.title; %></td>
+							<td><img src="/assets/images/whatsapp.png" class="rounded-0" style="height:20px;width:20px" /> WhatsApp</td>
+                            <td><%=entry.connector_external_id %></td>
+							<td class="result"></td>
+                            <td><%=dateformat(new Date(entry.created_at),'dd/mm/yyyy h:MM:ss') %></td>
+							<td class="text-right" style="width:1px">
+								<a href="/entrys/delete/<%=entry.entry_id; %>" class="remove_user">
+									<button class="btn btn-danger"><i data-feather="trash"></i> Remover</button>
+								</a>
+								<a href="/entrys/edit/<%=entry.entry_id; %>">
+									<button class="btn btn-info"><i data-feather="edit"></i> Editar</button>
+								</a>
+							</td>
+						</tr>
+						<% }) %>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<style>
+#dataTableMain .btn{
+	padding: 1px 10px;
+	margin: 0;
+	font-size: 10px;
+}
+#dataTableMain .btn svg{
+	height: 15px;
+	width: 15px;
+}</style>
+<script src="/assets/vendors/core/core.js"></script>
+<script src="/assets/vendors/feather-icons/feather.min.js"></script>
+<script src="/assets/js/template.js"></script>
+<script>
+	$('[json-data]').each(function (){
+		let data = JSON.parse($(this).attr('json-data'));
+		let instance = $(this).attr('connector_external_id')
+		$.get('https://api.chat-api.com/instance'+instance+'/status?token='+data.token).done(res=>{
+			$(this).find('.result').text('Ok!').attr('class','text-success')
+		}).fail(res=>{
+			$(this).find('.result').text('Erro').attr('class','text-danger')
+		});
+	})
+
+	$('.remove_user').on('click', function (e){
+		if(!confirm('Tem ceteza que deseja excluir esse grupo de entrada?'))e.preventDefault()
+	})
+</script>

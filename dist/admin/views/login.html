@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Kontac - Telek Sistemas</title>
+	<link rel="stylesheet" href="/assets/vendors/core/core.css">
+	<link rel="stylesheet" href="/assets/fonts/feather-font/css/iconfont.css">
+	<link rel="stylesheet" href="/assets/css/demo_1/style.css">
+	<link rel="shortcut icon" href="/assets/images/favicon.png">
+</head>
+<body>
+	<div class="main-wrapper">
+		<div class="page-wrapper full-page">
+			<div class="page-content d-flex align-items-center justify-content-center">
+				<div class="row w-100 mx-0 auth-page">
+					<div class="col-md-8 col-xl-4 mx-auto">
+						<div class="card">
+							<div class="auth-form-wrapper px-4 py-5 text-center">
+								<a href="#" class="noble-ui-logo d-block mb-2 pb-3">
+									<img src="/assets/images/logo.png" height=50 />
+								</a>
+								<h4 class="mb-2" id="titleBox"></h4>
+								<form class="forms-sample text-left" action="" method="post">
+									<div class="form-group">
+										<label for="exampleInputEmail1">E-mail ou nome de usuário</label>
+										<input type="email" class="form-control" name="email" placeholder="E-mail ou nome de usuário" autocomplete="useruu">
+									</div>
+									<div class="form-group">
+										<label for="exampleInputPassword1">Senha</label>
+										<input type="password" class="form-control" autocomplete="current-password" placeholder="Senha" name="password">
+									</div>
+									<div class="form-check form-check-flat form-check-success">
+										<label class="form-check-label">
+											<input type="checkbox" class="form-check-input">
+											Manter conexão
+										</label>
+									</div>
+									<div class="mt-3">
+										<button type="submit"
+											class="btn btn-block btn-success mr-2 mb-2 mb-md-0">Login</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<script src="../../../assets/vendors/core/core.js"></script>
+	<script src="../../../assets/vendors/feather-icons/feather.min.js"></script>
+	<script src="../../../assets/js/template.js"></script>
+	<script>
+		if(location.search==='?error'){
+			$('form').prepend('<div class="alert alert-danger text-center">Dados inválidos</div>')
+			window.history.pushState('','',location.href.split('?')[0])
+		}
+
+		if(location.search===''){
+			titleBox.innerText = 'LOGIN ADMINISTRAÇÃO';
+		}else{
+			titleBox.innerText = 'LOGIN OPERADOR';
+		}
+	</script>
+</body>
+</html>
