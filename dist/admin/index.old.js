@@ -98,8 +98,3 @@ var crtPath = '/etc/letsencrypt/live/whatsapp.telek.com.br';
 if (process.env.HOSTNAME === 'patrick') {
     crtPath = '/etc/letsencrypt/live/whatsapp.telek.local';
 }
-
-require('http').createServer(function (req, res) {
-    res.writeHead(301, { 'Location': 'https://' + req.headers.host + req.url });
-    return res.end();
-}).listen(80);
