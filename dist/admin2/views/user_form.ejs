@@ -1,0 +1,62 @@
+<%- contentFor('pageSectionA') %>
+<h3 class="mx-5">
+    <% if(type=='edit'){ %>Editar usuário<% }else{ %>Novo usuário<% } %>
+</h3>
+<div class="row">
+    <% if(alert){ %>
+        <div class="alert alert-<%=user.theme==2?'fill-':'' %><%=alert[0]; %> mx-5 my-3 w-100"><%=alert[1]; %></div>
+        <script>window.history.replaceState({}, document.title, location.href.split('?')[0]);</script>
+    <% } %>
+	<div class="card w-100 mx-5">
+		<form action="" method="post" class="card-body">
+            <div class="form-group">
+                <label class="w-100">
+                    Nome
+                    <input name="name" value="<%=name%>" class="form-control" required />
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="w-100">
+                    Apelido
+                    <input name="apelido" value="<%=apelido%>" class="form-control" required />
+                    <p class="text-secondary">Vai ser exibido ao agente</p>
+                </label>
+            </div>
+            <div class="form-group">    
+                <label class="w-100">
+                    E-mail
+                    <input type="email" name="email" value="<%=email%>" class="form-control" required />
+                </label>
+            </div>
+            <div class="form-group">    
+                <label class="w-100">
+                    Permissão do usuário
+                    <select name="permission" class="form-control">
+                        <option <%=permission=='admin'?'selected':''%> value="admin">Administrador</option>
+                        <option <%=permission=='agent'?'selected':''%> value="agent">Operador</option>
+                        <option <%=permission=='supervisor'?'selected':''%> value="agent">Supervisor</option>
+                    </select>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="w-100">
+                    Senha:
+                    <p class="text-secondary">
+                        <% if(true || user.user_id===user_id) { %>
+                            <input type="password" name="password" value="<%=password%>" class="form-control" placeholder="Senha (manter vazio se não desejar alterar)" />
+                        <% }else if(type=='edit'){ %>
+                            Você não pode modificar a senha de um usuário.
+                        <% }else{ %>
+                            A senha será enviada para o e-mail cadastrado acima
+                        <% } %></p>
+                </label class="w-100">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-outline-info">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="/assets/vendors/core/core.js"></script>
+<script src="/assets/vendors/feather-icons/feather.min.js"></script>
+<script src="/assets/js/template.js"></script>

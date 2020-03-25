@@ -1,0 +1,93 @@
+<%- contentFor('pageSectionA') %>
+<h3 class="mx-5">Filas de atendimento</h3>
+<div class="row">
+	<% if(alert){ %>
+		<div class="alert alert-<%=user.theme==2?'fill-':'' %><%=alert[0]; %> mx-5 my-3 w-100"><%=alert[1]; %></div>
+        <script>window.history.replaceState({}, document.title, location.href.split('?')[0]);</script>
+	<% } %>
+	<div class="card w-100 mx-5">
+		<div class="card-body">
+			<a href="/groups/add">
+				<button class="btn btn-info mb-2 float-right">Criar</button>
+			</a>
+			<div class="table-responsive">
+				<table id="dataTableMain" class="table">
+					<thead>
+						<tr>
+							<th>Nome da fila</th>
+							<th>Qtd. agentes</th>
+							<th>Inserido em</th>
+							<th>Último alteração</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<% groups.forEach(function(group) {  %>
+						<tr>
+							<td><%=group.group_name %></td>
+							<td><%=group.qtd %></td>
+							<td><%=dateformat(new Date(group.created_at),'dd/mm/yyyy h:MM:ss') %></td>
+							<td><%=dateformat(new Date(group.updated_at),'dd/mm/yyyy h:MM:ss') %></td>
+							<td class="text-right" style="width:1px">
+								<a href="#" class="remove" group_id="<%=group.group_id; %>">
+									<button class="btn btn-danger"><i data-feather="trash"></i> Remover</button>
+								</a>
+								<a href="/groups/edit/<%=group.group_id%>">
+									<button class="btn btn-info"><i data-feather="edit"></i> Editar</button>
+								</a>
+							</td>
+						</tr>
+						<% }) %>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<style>
+#dataTableMain .btn{
+	padding: 1px 10px;
+	margin: 0;
+	font-size: 10px;
+}
+#dataTableMain .btn svg{
+	height: 15px;
+	width: 15px;
+}</style>
+<link rel="stylesheet" href="/assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
+<script src="/assets/vendors/core/core.js"></script>
+<script src="/assets/vendors/feather-icons/feather.min.js"></script>
+<script src="/assets/js/template.js"></script>
+<script src="/assets/vendors/datatables.net/jquery.dataTables.js"></script>
+<script src="/assets/vendors/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+<script>
+	$('#dataTableMain').DataTable({
+		"aLengthMenu": [
+			[10, 30, 50, -1],
+			[10, 30, 50, "All"]
+		],
+		"iDisplayLength": 10,
+		"language": {
+			url: "/assets/vendors/datatables.net/Portuguese-Brasil.json",
+			sSearchPlaceholder:'Pesquisar'
+		}
+	});
+
+	$('.remove').on('click', function (e){
+		e.preventDefault()
+		if(confirm('Tem certeza que deseja excluir essa fila?')){
+			$.post('/groups/delete',{group_id:$(this).attr('group_id')}).then(function (){
+				alert('Fila foi removida com sucesso!')
+				location.reload()
+			}).catch(function ({status}){
+				if(status===401){
+					alert('A fila não pode ser excluída, pois você não tem permissão!');
+				}else{
+					alert('Erro '+status+"\nEntre em contato com o suporte")
+				}
+			})
+		}
+	})
+
+	
+</script>

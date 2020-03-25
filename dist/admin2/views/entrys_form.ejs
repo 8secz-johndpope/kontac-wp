@@ -1,0 +1,150 @@
+<%- contentFor('pageSectionA') %>
+<h3 class="mx-5">
+    <% if(type=='edit'){ %>Editar canal de entrada<% }else{ %>Novo canal de entrada<% } %>
+</h3>
+<div class="row">
+    <% if(alert){ %><div class="alert alert-fill-<%=alert[0]; %> mx-5 my-3 w-100"><%=alert[1]; %></div><% } %>
+	<div class="card w-100 mx-5">
+		<form action="" method="post" id="mainForm" class="card-body">
+            <div class="form-group">
+                <label class="w-100">
+                    Titulo de identificação
+                    <input required name="title" value="<%=title%>" class="form-control"/>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="w-100">
+                    Conector
+                    <select id="SelectConnector" name="connector">
+                        <option required value="whatsapp" selected>WhatsApp</option>
+                    </select>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="w-100">
+                    Grupo de atendimento
+                    <select class="form-control" name="go_group">
+                        <% groups.forEach(group=>{ %> <option <%=(go_group==group.group_id)?'selected':'' %> value=<%=group.group_id; %>><%=group.group_name; %></option> <% }) %>
+                    </select>
+                </label>
+            </div>
+            <div id="baseConfigConnector">
+                <div data-connector="whatsapp">
+                    <h5>Configração WhatsApp</h5>
+                    <div class="form-group">
+                        <label class="w-100">
+                            Instancia ChatAPI
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon3">instance</span>
+                                </div>
+                                <input required type="text" class="form-control" name="connector_external_id" placeholder="(ex: 12345)" value="<%=connector_external_id.replace(/[^0-9]/g,''); %>">
+                            </div>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="w-100">
+                            Token secreto
+                            <div class="input-group mb-3">
+                                <input required type="text" class="form-control" name="whatsapp_token" placeholder="(ex: anuj5uu6nyosnecz)" value="<%=json_data.token; %>" />
+                            </div>
+                        </label>
+                    </div>
+                    <div class="form-group d-flex w-100 justify-content-between">
+                        <span class="mr-3" id="resultTestConnector"></span>
+                        <div class="btn-group">
+                            <button class="btn btn-danger" id="btnLogoutWhatsApp">Desconectar</button>
+                            <button class="btn btn-success" id="testConnectorBtn">Testar conexão</button>
+                        </div>
+                    </div>
+                    <div class="form-group text-center" id="baseQrCode">
+                        <h4>Escaneie o QRCode abaixo:</h4>
+                        <img src="##" /><br/>
+                        <button class="btn btn-info" id="reloadQrCode">Recarregar QRCode</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-outline-info">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="/assets/vendors/core/core.js"></script>
+<script src="/assets/vendors/feather-icons/feather.min.js"></script>
+<script src="/assets/js/template.js"></script>
+<script>
+    const config_connector = {}
+    $('#baseConfigConnector > [data-connector]').each((i,el)=>{
+        config_connector[$(el).attr('data-connector')] = $(el).clone();
+        $(el).remove()
+    })
+
+    $('#SelectConnector').on('change', function(){
+        $('#baseConfigConnector > *').remove();
+        $('#baseConfigConnector').append(config_connector[$(this).val()])
+    }).trigger('change')
+
+    var timer_tester = null;
+    var get_tester = {state:()=>'resolved'};
+    
+    const testConnector = (e)=>{
+        if(e)e.preventDefault()
+        get_tester = $.get('https://api.chat-api.com/instance'+$('[name="connector_external_id"]').val()+'/status?token='+$('[name="whatsapp_token"]').val()).done(res=>{
+            var text_result = ['danger','erro'];
+            $('#btnLogoutWhatsApp').hide();
+            $('#baseQrCode').hide()               
+            if(res.accountStatus){
+                if(res.accountStatus==='authenticated'){
+                    text_result = ['success','Ok! A instancia já esta sincronizada com o WhatsApp']
+                    $('#btnLogoutWhatsApp').show();
+                }
+                if(res.accountStatus==='got qr code'){
+                    text_result = ['warning','A instancia é válida, agora basta escanear o QRCode abaixo']
+                    $('#baseQrCode').show()
+                    $('#baseQrCode img').attr('src', res.qrCode)
+                    setTimeout(function (){
+                        $('html').stop().animate({scrollTop:document.body.scrollHeight-window.innerHeight-80}, 1000, 'swing')
+                    },100);
+                }
+            }
+            $('#resultTestConnector').attr('class','text-'+text_result[0]+' mr-3').text(text_result[1])
+        }).fail(res=>{
+            if(res.statusText==='abort')return;
+            $('#resultTestConnector').attr('class','text-danger mr-3').text(res.responseJSON.error)
+        })
+    }
+
+    setInterval(function (){
+        if($('[name="connector_external_id"]').val()!==''&&
+        $('[name="whatsapp_token"]').val()!=='' &&
+        get_tester&&get_tester.state()==='resolved'){
+            testConnector()
+        }
+    },5000)
+    
+    $('#testConnectorBtn').on('click',testConnector)
+    $('#btnLogoutWhatsApp').hide();
+    $('#baseQrCode').hide()               
+    $('[name="connector_external_id"],[name="whatsapp_token"]').on('input', function (){
+        if(get_tester)get_tester.abort()
+        $('#resultTestConnector').attr('class','text-info mr-3').text('Aguardando...')
+        clearTimeout(timer_tester)
+        timer_tester = setTimeout(testConnector,1000)
+    })
+
+    $('#reloadQrCode').on('click', function (e){
+        e.preventDefault()
+        let instance = $('[name="connector_external_id"]').val()
+        let token = $('[name="whatsapp_token"]').val()
+        $('#baseQrCode img').css('opacity',0).attr('src', 'https://api.chat-api.com/instance'+instance+'/qr_code?token='+token).css('opacity',1)
+        new Image
+    })
+
+    $('#mainForm').on('submit', function(e){
+        if(!$('#resultTestConnector').is('.text-success')){
+            e.preventDefault()
+            alert('Você precisa configurar o conector com o WhatsApp')
+        }
+    })
+</script>

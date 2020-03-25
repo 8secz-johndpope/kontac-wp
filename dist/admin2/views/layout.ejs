@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Kontac - Telek Sistemas</title>
+    <link rel="stylesheet" href="/assets/vendors/core/core.css">
+    <link rel="stylesheet" href="/assets/fonts/feather-font/css/iconfont.css">
+    <link rel="stylesheet" href="/assets/css/demo_<%=user.theme %>/style.css" id="link_css">
+    <link rel="shortcut icon" href="/assets/images/favicon.png" />
+</head>
+<body>
+    <div class="main-wrapper">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="sidebar-brand">
+                    <img src="/assets/images/logo<%=user.theme==1?'':'-light' %>.png" id="logo" height=40 />
+                </a>
+                <div class="sidebar-toggler not-active">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div class="sidebar-body">
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a href="/dashboard" class="nav-link">
+                            <i class="link-icon" data-feather="box"></i>
+                            <span class="link-title">Dashboard</span>
+                        </a>
+                    </li>
+                    <% if(user.permission==='admin'){ %>
+                    <li data-permission="admin" class="nav-item nav-category">Usuários</li>
+                    <li data-permission="admin" class="nav-item">
+                        <a href="/users" class="nav-link">
+                            <i class="link-icon" data-feather="users"></i>
+                            <span class="link-title">Usuários</span>
+                        </a>
+                    </li>
+                    <% } %>
+                    <!--<li class="nav-item">
+                        <a href="/users/add" class="nav-link">
+                            <i class="link-icon" data-feather="user-plus"></i>
+                            <span class="link-title">Criar usuário</span>
+                        </a>
+                    </li>-->
+                    <li class="nav-item nav-category">Fila de atendimento</li>
+                    <li class="nav-item">
+                        <a href="/groups" class="nav-link">
+                            <i class="link-icon" data-feather="package"></i>
+                            <span class="link-title">Filas</span>
+                        </a>
+                    </li>
+                    <!--<li class="nav-item">
+                        <a href="/groups/add" class="nav-link">
+                            <i class="link-icon" data-feather="plus"></i>
+                            <span class="link-title">Novo grupo</span>
+                        </a>
+                    </li>-->
+                    <% if(user.permission==='admin'){ %>
+                    <li data-permission="admin" class="nav-item nav-category">Canais de entrada</li>
+                    <li data-permission="admin" class="nav-item">
+                        <a href="/entrys" class="nav-link">
+                            <i class="link-icon" data-feather="download-cloud"></i>
+                            <span class="link-title">Canais</span>
+                        </a>
+                    </li>
+                    <% } %>
+                    <li data-permission="admin" class="nav-item nav-category">Configuraçẽos de pausas</li>
+                    <li data-permission="admin" class="nav-item">
+                        <a href="/pauses" class="nav-link">
+                            <i class="link-icon" data-feather="pause"></i>
+                            <span class="link-title">Pausas</span>
+                        </a>
+                    </li>
+                    <!--<li class="nav-item">
+                        <a href="/entrys/add" class="nav-link">
+                            <i class="link-icon" data-feather="plus"></i>
+                            <span class="link-title">Novo canal</span>
+                        </a>
+                    </li>-->
+                    <li class="nav-item nav-category">Relatórios</li>
+                    <li class="nav-item">
+                        <a href="/relatorio/desempenho-de-usuarios" class="nav-link">
+                            <i class="link-icon" data-feather="bar-chart"></i>
+                            <span class="link-title">Desempenho de usuários</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/usesr_add" class="nav-link">
+                            <i class="link-icon" data-feather="bar-chart"></i>
+                            <span class="link-title">Volume diário</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/usesr_add" class="nav-link">
+                            <i class="link-icon" data-feather="bar-chart"></i>
+                            <span class="link-title">Efetividade</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/usser_add" class="nav-link">
+                            <i class="link-icon" data-feather="bar-chart"></i>
+                            <span class="link-title">Tempo produtivo</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="page-wrapper">
+            <nav class="navbar">
+                <a href="#" class="sidebar-toggler">
+                    <i data-feather="menu"></i>
+                </a>
+                <div class="navbar-content">
+                    <ul class="navbar-nav">
+                        <li class="d-flex align-items-center">
+                            <label class="m-0">Light</label>
+                            <div class="indicator_toggle <%=user.theme==2?'dark':'' %>" id="toggleTheme"></div>
+                            <label class="m-0">Dark</label class="m-0">
+                        </li>
+                        <li class="nav-item dropdown nav-apps" data-toggle="tooltip" data-placement="bottom" title="Contate o suporte">
+                            <a class="nav-link dropdown-toggle" href="mailto:suporte@telek.com.br" rfole="button">
+                                <i data-feather="life-buoy"></i>
+                            </a>
+                        </li>
+                        <!--<li class="nav-item dropdown nav-notifications">
+                            <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i data-feather="bell"></i>
+                                <% if (false) { %>
+                                <div class="indicator">
+                                    <div class="circle"></div>
+                                </div>
+                                <% } %>
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="notificationDropdown">
+                                <div class="dropdown-header d-flex align-items-center justify-content-between">
+                                    <p class="mb-0 font-weight-medium">6 New Notifications</p>
+                                    <a href="javascript:;" class="text-muted">Clear all</a>
+                                </div>
+                                <div class="dropdown-body">
+                                    <a href="javascript:;" class="dropdown-item">
+                                        <div class="icon">
+                                            <i data-feather="user-plus"></i>
+                                        </div>
+                                        <div class="content">
+                                            <p>New customer registered</p>
+                                            <p class="sub-text text-muted">2 sec ago</p>
+                                        </div>
+                                    </a>
+                                    <a href="javascript:;" class="dropdown-item">
+                                        <div class="icon">
+                                            <i data-feather="gift"></i>
+                                        </div>
+                                        <div class="content">
+                                            <p>New Order Recieved</p>
+                                            <p class="sub-text text-muted">30 min ago</p>
+                                        </div>
+                                    </a>
+                                    <a href="javascript:;" class="dropdown-item">
+                                        <div class="icon">
+                                            <i data-feather="alert-circle"></i>
+                                        </div>
+                                        <div class="content">
+                                            <p>Server Limit Reached!</p>
+                                            <p class="sub-text text-muted">1 hrs ago</p>
+                                        </div>
+                                    </a>
+                                    <a href="javascript:;" class="dropdown-item">
+                                        <div class="icon">
+                                            <i data-feather="layers"></i>
+                                        </div>
+                                        <div class="content">
+                                            <p>Apps are ready for update</p>
+                                            <p class="sub-text text-muted">5 hrs ago</p>
+                                        </div>
+                                    </a>
+                                    <a href="javascript:;" class="dropdown-item">
+                                        <div class="icon">
+                                            <i data-feather="download"></i>
+                                        </div>
+                                        <div class="content">
+                                            <p>Download completed</p>
+                                            <p class="sub-text text-muted">6 hrs ago</p>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="dropdown-footer d-flex align-items-center justify-content-center">
+                                    <a href="javascript:;">Ver todas</a>
+                                </div>
+                            </div>
+                        </li>-->
+                        <li class="nav-item dropdown nav-profile">
+                            <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img src="/assets/images/c.jpg" alt="profile">
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="profileDropdown">
+                                <div class="dropdown-header d-flex flex-column align-items-center">
+                                    <div class="figure mb-3">
+                                        <img src="/assets/images/c.jpg" alt="">
+                                    </div>
+                                    <div class="info text-center">
+                                        <p class="name font-weight-bold mb-0"><%=user.name %></p>
+                                        <p class="email text-muted mb-3"><%=user.email %></p>
+                                    </div>
+                                </div>
+                                <div class="dropdown-body">
+                                    <ul class="profile-nav p-0 pt-3">
+                                        <li class="nav-item">
+                                            <a href="/users/edit/me" class="nav-link">
+                                                <i data-feather="user"></i>
+                                                <span>Meu usuário</span>
+                                            </a>
+                                        </li>
+                                        <!---<li class="nav-item">
+                                            <a href="/users/edit/me" class="nav-link">
+                                                <i data-feather="settings"></i>
+                                                <span>Configurações</span>
+                                            </a>
+                                        </li>-->
+                                        <li class="nav-item">
+                                            <a href="/agent" class="nav-link">
+                                                <i data-feather="repeat"></i>
+                                                <span>Modo operador</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="/logout" class="nav-link">
+                                                <i data-feather="log-out"></i>
+                                                <span>Sair</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="page-content">
+                <%-pageSectionA %>
+            </div>
+            <footer class="footer d-flex flex-column flex-md-row align-items-center justify-content-between">
+                <p class="text-muted text-center text-md-left">Copyright © 2011-2020 <a href="https://www.telek.com.br" target="_blank">Telek Sistemas</a>. 
+                    Todos os direitos reservados</p>
+            </footer>
+        </div>
+    </div>
+
+    
+    <style>
+        .indicator_toggle{
+            height: 10px;
+            width: 20px;
+            margin-left: 10px;
+            margin-right: 10px;
+            background: #ddd;
+            border-radius: 5000px;
+        }
+        .indicator_toggle:before{
+            content: '';
+            display: table;
+            height: 15px;
+            width: 15px;
+            background: #66d1d1;
+            border-radius: 50%;
+            margin-top: -2.5px;
+            margin-left: -2.5px;
+        }
+        .indicator_toggle.dark:before{
+            margin-left: 7.5px;
+        }
+    </style>
+    <script>
+    
+    var css = {
+        dark: '/assets/css/demo_2/style.css',
+        light: '/assets/css/demo_1/style.css'
+    }
+    $('#toggleTheme').on('click', function(){
+        $(this).toggleClass('dark')
+        if($(this).hasClass('dark')){
+            localStorage.theme = '2'
+            link_css.href=css.dark
+            $(logo).attr('src','/assets/images/logo-light.png');
+            $.post('/set_theme',{theme:localStorage.theme})
+        }else{
+            localStorage.theme = '1'
+            $(logo).attr('src','/assets/images/logo.png');
+            link_css.href=css.light
+            $.post('/set_theme',{theme:localStorage.theme})
+        }
+    })
+
+    </script>
+</body>
+</html>

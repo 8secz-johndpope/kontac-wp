@@ -1,0 +1,111 @@
+<%- contentFor('pageSectionA') %>
+<h3 class="mx-5">
+    <% if(type=='edit'){ %>Editar fila<% }else{ %>Nova fila<% } %>
+</h3>
+<div class="row">
+    <% if(alert){ %><div class="alert alert-fill-<%=alert[0]; %> mx-5 my-3 w-100"><%=alert[1]; %></div><% } %>
+	<div class="card w-100 mx-5">
+		<form action="" method="post" class="card-body" id="mainForm">
+            <div class="form-group">
+                <label class="w-100">
+                    Nome da fila
+                    <input _required name="group_name" value="<%=group_name%>" class="form-control"/>
+                    <p class="text-danger" style="display:none">Esse nome já está sendo usado</p>
+                </label>
+            </div>
+            <div class="form-group">    
+                Usuários
+                <%users.forEach(user=>{ %>
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input type="checkbox" value="<%=user.user_id; %>" name="users[]" class="form-check-input" <%=(users_selected.indexOf(user.user_id)>-1)?'checked':''; %> />
+                            <%=user.name; %><%=(user.permission==='admin'?' (admin)':'');%>  (<%=user.email;%>)
+                        </label>
+                    </div>
+                <% }) %>
+                </label>
+            </div>
+            <div class="form-group">
+                Qualificações
+                <%statuses.forEach(status=>{ %>
+                    <div class="base-quali-item mb-2">
+                        <input _required class="form-control mr-2" value="<%=status%>" placeholder="Nome da qualificação" name="status[]" />
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeStatus(event)" type="button">Remover</button>
+                    </div>
+                <% }) %>
+                <button class="btn btn-outline-secondary" id="addStatus" type="button">Adicionar qualificação</button>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit" id="mainFormSubmit">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+.base-quali-item{
+    display: flex;
+}
+.base-quali-item input{
+    flex:1;
+}
+</style>
+<script src="/assets/vendors/core/core.js"></script>
+<script src="/assets/vendors/feather-icons/feather.min.js"></script>
+<script src="/assets/js/template.js"></script>
+<script>
+    function removeStatus(e){
+        e.preventDefault()
+        if(document.querySelectorAll('.base-quali-item').length===1)return alert('Você precisa ter ao menos uma qualificação');
+        e.target.parentElement.remove()
+    }
+    $(addStatus).on('click', function (e){
+        e.preventDefault()
+        var ref = $('.base-quali-item:first-child').clone();
+        ref.find('input').val('')
+        ref.insertBefore(this)
+    })
+    $('#mainForm').on('submit', function (e){
+        let runEach = true;
+        $(this).find('input[_required]').each(function (){
+            if(!runEach)return;
+            if($(this).val()==='' || $(this).val()===' '){
+                e.preventDefault()
+                alert('Você precisa preencher esse campo')
+                runEach=false
+                return $(this).focus();
+            }
+        })
+    })
+    
+    var timerGroupName = null;
+    $('[name="group_name"]').on('input', function (){
+        $('#mainFormSubmit').prop('disabled', false).addClass('disabled').removeClass('border-danger')
+        $('[name="group_name"').removeClass('border-danger').next().hide()
+        if(timerGroupName){
+            clearTimeout(timerGroupName)
+        }
+        timerGroupName = setTimeout(function (){
+            let group_name = $('[name="group_name"]').val().trim()
+            $.get('/groups/check_name', {
+                group_name
+            }, function (res){
+                <% if(type==='edit'){ %>
+                    console.log('<%=group_name%>'.trim(), group_name.trim(), '<%=group_name%>'.trim()===group_name.trim())
+                    if('<%=group_name%>'.trim()===group_name.trim()){
+                        $('#mainFormSubmit').prop('disabled', false).removeClass('disabled')
+                        return;
+                    }
+                <% } %>
+                if(res==='OK'){
+                    $('#mainFormSubmit').prop('disabled', false).removeClass('disabled')
+                    $('[name="group_name"').removeClass('border-danger').next().hide()
+                }else{
+                    $('#mainFormSubmit').prop('disabled', true).addClass('disabled')
+                    $('[name="group_name"').addClass('border-danger').next().show()
+                }
+            })
+        },500)
+        
+    })
+    $('[name="group_name"]').trigger('input')
+</script>

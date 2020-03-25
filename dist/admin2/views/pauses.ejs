@@ -1,0 +1,183 @@
+<%- contentFor('pageSectionA') %>
+<h3 class="mx-5">Pausas</h3>
+<div class="row">
+	<div class="card w-100 mx-5">
+		<div class="card-body">
+			<button class="btn btn-info mb-2 float-right" data-toggle="modal" data-target="#newPause" id="btnOpenModalNewPause">Criar nova pausa</button>
+			<div class="table-responsive">
+				<table id="dataTableMain" class="table overflow-hidden">
+					<thead>
+						<tr>
+							<th>ID da pausa</th>
+							<th>Nome</th>
+							<th>Vencimento de pausa</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<% pauses.forEach(function(pause) {  %>
+						<tr>
+							<td><%=pause.pause_id %></td>
+							<td><%=pause.pause_name %></td>
+							<td><%=pause.pause_limit %></td>
+							<td width="1%">
+                                <button class="btn btn-xs btn-info" onclick="editPause(<%=pause.pause_id %>)">Editar pausa</button>
+                                <a href="/pauses/delete/<%=pause.pause_id %>"
+                                    onclick="return confirm('Tem certeza que deseja excluir?') ">
+                                    <button class="btn btn-xs btn-danger">Excluir</button>
+                                </a>
+                            </td>
+						</tr>
+						<% }) %>
+					</tbody>
+                </table>
+                <% if(pauses.length===0) { %> <div class="text-center text-secondary">vazio</div><% } %>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="newPause" tabindex="-1" role="dialog" aria-labelledby="newPause" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newPauseLabel">Criar nova pausa</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="post" id="formPause" onsubmit="$('#btnSubmitPause').click();return false;">
+                    <div class="form-group">
+                        <label class="d-block">
+                            Nome da pausa
+                            <input name="pause_name" placeholder="Digite o nome da pausa" class="form-control" required />
+                            <div class="text-danger" style="display: none">Esse nome de pausa já está sendo usado</div>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="d-block">
+                            Vencimento da pausa
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <select name="max_hour" class="form-control">
+                                        <% for(let i=0;i<24;i++) { %>
+                                            <option><%=(""+i).length===1?'0'+i:i; %></option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <select name="max_minute" class="form-control">
+                                        <% for(let i=0;i<60;i++) { %>
+                                            <option><%=(""+i).length===1?'0'+i:i; %></option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <select name="max_second" class="form-control">
+                                        <% for(let i=0;i<60;i++) { %>
+                                            <option><%=(""+i).length===1?'0'+i:i; %></option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                            </div>
+                            <p class="text-secondary text-small">Caso deixar 00:00:00, a pausa nunca vencerá</p>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="btnSubmitPause">Salvar alterações</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/vendors/core/core.js"></script>
+<script src="/assets/vendors/feather-icons/feather.min.js"></script>
+<script src="/assets/js/template.js"></script>
+<script src="/assets/vendors/inputmask/jquery.inputmask.bundle.min.js"></script>
+<script src="/assets/js/inputmask.js"></script>
+
+<script>
+    let pause_names = <%-JSON.stringify(pauses.map(a=>({
+        pause_name: a.pause_name,
+        pause_id: a.pause_id}))) %>;
+
+    let modalEdit = null
+
+    $('#btnSubmitPause').on('click', function(){
+        if($('#btnSubmitPause').hasClass('disabled'))return true;
+        let data = $('#formPause')
+            .serializeArray()
+            .reduce((obj, item)=>({...obj,[item.name]:item.value}), {});
+            
+        if(data.pause_name===''){
+            alert('Você precisa criar um nome para essa pausa')
+            $('#formPause [name="pause_name"]').focus()
+            return; 
+        }
+
+        $('#btnSubmitPause').addClass('disabled').prop('disabled', true)
+        $.post('/pauses/'+(modalEdit?'edit/'+modalEdit:'new'), data, (res)=>{
+            if(modalEdit){
+                alert('Editado com sucesso');
+            }else{
+                alert('Criado com sucesso');
+            }
+            $('#newPause').modal('hide')
+            window.location.reload()
+
+        })
+
+    })
+
+    $('#btnOpenModalNewPause').on('click', function (){
+        modalEdit = null
+        $('#newPause #newPauseLabel').text('Criar nova pausa')
+        $('#newPause select').val('00')
+        $('#btnSubmitPause').removeClass('disabled').prop('disabled', false)
+        $('#newPause input').val('').trigger('input')
+    })
+
+    $('.btnDelete').on('click', function (e){
+        if(!confirm('Tem certeza que deseja excluir?')){
+            e.preventDefault()
+        }
+    })
+
+    function editPause(id){
+        modalEdit = id
+        $('#newPause').modal('show')
+        $('#newPause #newPauseLabel').text('Editar pausa')
+        $('#btnSubmitPause').removeClass('disabled').prop('disabled', false)
+        $('#newPause input').val('')
+        $('#newPause select').val('00')
+
+        $.get('/pauses/'+id, function(res){
+            $('#newPause input').val(res.pause_name)
+            res.pause_limit = res.pause_limit.split(':')
+            $('#newPause [name="max_hour"]').val(res.pause_limit[0])
+            $('#newPause [name="max_minute"]').val(res.pause_limit[1])
+            $('#newPause [name="max_second"]').val(res.pause_limit[2])
+        })
+    }
+
+    $('#newPause [name="pause_name"]').on('input', function (){
+        if(pause_names.map(a=>a.pause_name.trim()).includes($(this).val().trim())){
+            let pause_id = pause_names.filter(a=>a.pause_name.trim() === $(this).val().trim())[0].pause_id
+            if(modalEdit != pause_id){
+                $('#btnSubmitPause').addClass('disabled').prop('disabled', true)
+                $(this).addClass('border-danger').next().show()
+            }
+        }else{
+            if($(this).val().trim()===''){
+                $('#btnSubmitPause').addClass('disabled').prop('disabled', true)
+            }else{
+                $('#btnSubmitPause').removeClass('disabled').prop('disabled', false)
+                $(this).removeClass('border-danger').next().hide()
+            }
+        }
+    })
+</script>

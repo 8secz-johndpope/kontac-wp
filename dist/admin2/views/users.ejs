@@ -1,0 +1,108 @@
+<%- contentFor('pageSectionA') %>
+<h3 class="mx-5">Usuários</h3>
+<div class="row">
+	<% if(alert){ %>
+		<div class="alert alert-<%=user.theme==2?'fill-':'' %><%=alert[0]; %> mx-5 my-3 w-100"><%=alert[1]; %></div>
+        <script>window.history.replaceState({}, document.title, location.href.split('?')[0]);</script>
+	<% } %>
+	<div class="card w-100 mx-5">
+		<div class="card-body">
+			<a href="/users/add">
+				<button class="btn btn-info mb-2 float-right">Criar novo usuário</button>
+			</a>
+			<div class="table-responsive">
+				<table id="dataTableMain" class="table">
+					<thead>
+						<tr>
+							<th>Nome</th>
+							<th>Permissão</th>
+							<th>Cadastro</th>
+							<th>Último login</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<% users.forEach(function(user) {  %>
+						<tr>
+							<td><%=user.name %></td>
+							<td><span class="badge badge-success"><%=user.permission %></span></td>
+							<td><%=dateformat(new Date(user.created_at),'dd/mm/yyyy h:MM:ss') %></td>
+							<td><%=dateformat(new Date(user.last_login),'dd/mm/yyyy h:MM:ss') %></td>
+							<td class="text-right" style="width:1px">
+								<a href="#" class="remove_user" data-id="<%=user.user_id %>">
+									<button class="btn btn-danger"><i data-feather="trash"></i> Remover</button>
+								</a>
+								<a href="/users/edit/<%=user.user_id%>">
+									<button class="btn btn-info"><i data-feather="edit"></i> Editar</button>
+								</a>
+								<div class="dropdown d-inline d-none">
+									<a type="button" id="dropdownMenuButton" data-toggle="dropdown">
+										<i data-feather="chevron-down" color="#ccc"></i>
+									</a>
+									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+										<a class="dropdown-item requestNewPassword cursor-pointer" data-id="<%=user.user_id %>" href="#">Solicitar nova senha</a>
+									</div>
+								</div>
+							</td>
+						</tr>
+						<% }) %>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<style>
+#dataTableMain .btn{
+	padding: 1px 10px;
+	margin: 0;
+	font-size: 10px;
+}
+#dataTableMain .btn svg{
+	height: 15px;
+	width: 15px;
+}</style>
+<link rel="stylesheet" href="/assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
+<script src="/assets/vendors/core/core.js"></script>
+<script src="/assets/vendors/feather-icons/feather.min.js"></script>
+<script src="/assets/js/template.js"></script>
+<script src="/assets/vendors/datatables.net/jquery.dataTables.js"></script>
+<script src="/assets/vendors/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+<script>
+	$('#dataTableMain').DataTable({
+		"aLengthMenu": [
+			[10, 30, 50, -1],
+			[10, 30, 50, "All"]
+		],
+		"iDisplayLength": 10,
+		"language": {
+			url: "/assets/vendors/datatables.net/Portuguese-Brasil.json",
+			sSearchPlaceholder:'Pesquisar'
+		}
+	});
+
+	$('.remove_user').on('click', function (e){
+		e.preventDefault()
+		if(confirm('Tem certeza que deseja excluir esse usuário?')){
+			$.post('/users/delete',{user_id:$(this).attr('data-id')}).then(function (){
+				alert('O usuário foi removido com sucesso!')
+				location.reload()
+			}).catch(function ({status}){
+				if(status===401){
+					alert('O usuário não pode ser excluído, pois você não tem permissão!');
+				}else{
+					alert('Erro '+status+"\nEntre em contato com o suporte")
+				}
+			})
+		}
+	})
+
+
+	$('.requestNewPassword').on('click', function (e){
+		e.preventDefault()
+		$.post('/users/request_password', {user_id: $(this).attr('data-id')}, function (){
+			alert('Foi enviada uma nova senha para o e-mail correspondente')
+		})
+	})
+	
+</script>

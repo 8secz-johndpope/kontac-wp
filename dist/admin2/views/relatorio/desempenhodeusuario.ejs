@@ -1,0 +1,214 @@
+<%- contentFor('pageSectionA') %>
+<link rel="stylesheet" href="/assets/vendors/daterangepicker/daterangepicker.css">
+<h3 class="mx-5">Relatório: Desempenho de usuário</h3>
+<div class="row mx-5">
+    <div class="col-sm-3">
+        <div class="card">
+            <div class="card-header">
+                <h5>Filtro do relatório</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert d-none" id="alertFilter"></div>
+                <b>Agrupamento de período</b>
+                <div class="form-check form-check-flat form-check-primary">
+                    <label class="form-check-label">
+                        <input type="radio" name="agroup_time" value="hora" class="form-check-input">
+                        Hora
+                    </label>
+                </div>
+                <div class="form-check form-check-flat form-check-primary">
+                    <label class="form-check-label">
+                        <input type="radio" name="agroup_time" value="dia" class="form-check-input">
+                        Dia
+                    </label>
+                </div>
+                <hr />
+                <b>Preíodo</b>
+                <input type="text" class="form-control" name="dates">
+                <hr />
+                <b>Usuários:</b>
+                <% users.forEach(function (user){ %>
+                    <div class="form-check form-check-flat form-check-primary">
+                        <label class="form-check-label">
+                            <input type="checkbox" name="users[]" class="form-check-input" value="<%=user.user_id %>" />
+                            <%=user.name %>
+                        </label>
+                    </div>    
+                <% }) %>
+                <hr>
+                <button class="btn btn-warning btn-block" id="btnApplyFilter">Aplicar</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-9">
+        <div class="card">
+            <div class="card-body">
+                <p class="text-secondary">No relatório abaixo você vê o desempenho dos usuários que foram selecionado na coluna ao lado separadamente por hora ou dia</p>
+                <div id="chartDesempenhoDeUsuario"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css">
+
+
+<script src="/assets/vendors/core/core.js"></script>
+<script src="/assets/vendors/feather-icons/feather.min.js"></script>
+<script src="/assets/js/template.js"></script>
+
+
+<script src="/assets/vendors/apexcharts/apexcharts.min.js"></script>
+<script src="/assets/vendors/moment/moment.min.js"></script>
+<script src="/assets/vendors/daterangepicker/daterangepicker.min.js"></script>
+
+
+<script>
+    $(function() {
+        'use strict';
+        moment.defineLocale('pt-br', {
+            months : 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split('_'),
+            monthsShort : 'Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez'.split('_'),
+            weekdays : 'Domingo_Segunda-feira_Terça-feira_Quarta-feira_Quinta-feira_Sexta-feira_Sábado'.split('_'),
+            weekdaysShort : 'D_S_T_Q_Q_S_S'.split('_'),
+            weekdaysMin : 'D_S_T_Q_Q_S_S'.split('_'),
+            longDateFormat : {
+                LT : 'HH:mm',
+                LTS : 'LT:ss',
+                L : 'DD/MM/YYYY',
+                LL : 'D [de] MMMM [de] YYYY',
+                LLL : 'D [de] MMMM [de] YYYY [às] LT',
+                LLLL : 'dddd, D [de] MMMM [de] YYYY [às] LT'
+            },
+            calendar : {
+                sameDay: '[Hoje às] LT',
+                nextDay: '[Amanhã às] LT',
+                nextWeek: 'dddd [às] LT',
+                lastDay: '[Ontem às] LT',
+                lastWeek: function () {
+                    return (this.day() === 0 || this.day() === 6) ?
+                        '[Último] dddd [às] LT' : // Saturday + Sunday
+                        '[Última] dddd [às] LT'; // Monday - Friday
+                },
+                sameElse: 'L'
+            },
+            relativeTime : {
+                future : 'em %s',
+                past : '%s atrás',
+                s : 'segundos',
+                m : 'um minuto',
+                mm : '%d minutos',
+                h : 'uma hora',
+                hh : '%d horas',
+                d : 'um dia',
+                dd : '%d dias',
+                M : 'um mês',
+                MM : '%d meses',
+                y : 'um ano',
+                yy : '%d anos'
+            },
+            ordinalParse: /\d{1,2}º/,
+            ordinal : '%dº',
+        });
+
+        $('input[name="dates"]').daterangepicker({
+            opens: 'right',
+            drops: 'up',
+            locale:{
+                cancelLabel:'',
+                applyLabel: 'Aplicar'
+            }
+        });
+
+        const applyFilter = (filter)=>{
+            $('#alertFilter').attr('class','d-none')
+            if(!filter || filter.type){
+                window.filter = {
+                    agroup_time: $('[name="agroup_time"]:checked').val(),
+                    dates: $('[name="dates"]').val().split(' - ').map(a=>a.split('/').reverse().join('-')),
+                    users: $('[name="users[]"]:checked').get().map(a=>$(a).val())
+                }
+                filter = window.filter
+            }else{
+                $('[name="agroup_time"][value="'+filter.agroup_time+'"]').prop('checked', true)   
+                let dates = filter.dates.map(a=>a.split('-').reverse().join('/'))
+                $('[name="dates"]').data('daterangepicker').setStartDate(dates[0])   
+                $('[name="dates"]').data('daterangepicker').setEndDate(dates[1])
+                filter.users.forEach(user=>{
+                    $('[name="users[]"][value="'+user+'"]').prop('checked', true)
+                })
+                
+            }
+
+            if(filter.users.length===0){
+                return $('#alertFilter').attr('class','alert alert-'+(localStorage.theme==2?'fill-':'')+'danger').text('Selecione ao menos uma data')
+            }
+
+            let columns = [];
+            let current_date = moment(filter.dates[0]);
+            if(filter.agroup_time==='dia'){
+
+                for(let cDate = moment(filter.dates[0]);cDate<=moment(filter.dates[1]);cDate.add('days',1)){
+                    columns.push(cDate.format('DD/MM/YYYY'));
+                }
+                //columns=columns.map(a=>a.format('DD/MM/YYYY'))
+            }
+
+            window.chart.updateOptions({
+                xaxis: {
+                    categories: columns
+                }
+            })
+
+            localStorage.filterDesempenhoDeUsuarios = JSON.stringify(filter)
+
+            $.get('?get=true&data='+JSON.stringify(filter),function (result){
+                let newSeries = [];
+                let columns__ = columns.map(a=>a.split('/').reverse().join('-'))
+                filter.users.forEach(user=>{
+                    let lineSerie = {
+                        name: $('[name="users[]"][value="'+user+'"]').parent().text().trim(),
+                        data: columns__.map( a =>{
+                            return result.filter( b => b.user_id == user && b.date == a)
+                        })
+                    }
+                    lineSerie.data=lineSerie.data.map(a=>a.length===0?0:a[0].count)
+                    console.log(lineSerie)
+                    newSeries.push(lineSerie)
+                })
+                //console.log(newSeries)
+                window.chart.updateSeries(newSeries)
+            })
+        }
+        
+        $('#btnApplyFilter').on('click', applyFilter)
+        
+        
+        window.chart = new ApexCharts(document.querySelector("#chartDesempenhoDeUsuario"), {
+            series: [],
+            chart: {
+                height: 350,
+                type: 'heatmap',
+            },
+            dataLabels: {
+                enabled: false
+            },
+            colors: ["#008FFB"],
+            title: {
+                text: ''
+            },
+            xaxis: {
+                categories: ['','']
+            }
+        });
+        chart.render();
+
+        
+
+    
+    if(localStorage.hasOwnProperty('filterDesempenhoDeUsuarios')){
+        applyFilter(JSON.parse(localStorage.filterDesempenhoDeUsuarios))
+    }
+    });
+    
+</script>
